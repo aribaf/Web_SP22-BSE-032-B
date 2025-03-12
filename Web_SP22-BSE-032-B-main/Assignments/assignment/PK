@@ -1,0 +1,20 @@
+/* hide express buttons for GE operated countries */
+.additional-checkout-buttons,
+[data-shopify="payment-button"]
+[data-alternative-payments],
+[data-testid="GooglePay-button"],
+[data-testid="ShopifyPay-button"],
+iframe[title="Checkout with PayPal"],
+.ge-hide-display-none {
+    display: none;
+}
+
+/* Hide shop pay checkout modal */
+#shopify-pay-modal {
+    display: none !important;
+}
+
+.ge-hide, .shopify-payment-button, .afterpay-paragraph, form[action='https://payments.amazon.com/checkout/signin'], .ProductMeta__Klarna, div.ProductMeta div.Affirm {
+    visibility: hidden;
+}
+

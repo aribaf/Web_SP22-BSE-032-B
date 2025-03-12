@@ -1,0 +1,1968 @@
+GLBE_PARAMS_2 = {
+        isExternal: false,
+        appUrl: "https://crossborder-integration.global-e.com/",
+        pixelUrl: "https://utils.global-e.com",
+        pixelEnabled: true,
+        geAppUrl: "https://web.global-e.com/",
+        env: "Production",
+        geCDNUrl: "https://web-she.global-e.com/",
+        analyticsSDKCDN : "https://globale-analytics-sdk.global-e.com/PROD/bundle.js",
+        apiUrl: "https://api.global-e.com/",
+        emi: "ttrzq",
+        mid: "30000106",
+        hiddenElements: ".ge-hide,.afterpay-paragraph,form[action='https://payments.amazon.com/checkout/signin']",
+        operatedCountries: ["AD","AE","AG","AI","AL","AM","AO","AR","AT","AU","AW","AZ","BA","BB","BD","BE","BF","BG","BH","BI","BJ","BL","BM","BN","BO","BR","BS","BW","BZ","CA","CH","CI","CK","CL","CM","CO","CR","CV","CW","CY","CZ","DE","DJ","DK","DM","DO","DZ","EC","EE","EG","ES","ET","FI","FJ","FK","FO","FR","GA","GD","GE","GF","GH","GI","GL","GM","GN","GP","GQ","GR","GT","GW","GY","HK","HN","HR","HT","HU","ID","IE","IL","IN","IS","IT","JM","JO","JP","KE","KG","KH","KI","KM","KN","KR","KW","KY","KZ","LA","LB","LC","LI","LK","LR","LS","LT","LU","LV","MA","MC","MD","ME","MF","MG","MK","MN","MO","MQ","MS","MT","MU","MV","MW","MX","MY","MZ","NA","NC","NI","NL","NO","NP","NR","NU","NZ","OM","PA","PE","PF","PG","PH","PK","PL","PT","PY","QA","RE","RO","RS","SA","SB","SC","SE","SG","SH","SI","SK","SL","SM","SN","SR","ST","SV","SX","SZ","TC","TD","TG","TH","TL","TM","TN","TO","TT","TV","TW","TZ","UG","US","UY","UZ","VA","VC","VE","VG","VN","VU","WF","WS","YT","ZA","ZM","ZW"],
+        c1Enabled:"true",
+        siteId: "7ce243a1e1a2",
+        isTokenEnabled: "true",
+        cartAttributesSkipPagesRegex: "",
+        suppressCartAttributesUpdate: false,
+        suppressCartAttributesUpdateOnNotOperated: false,
+        useBrowsingStartEventInsteadOfPageViewed: false,
+        isAnalyticsPageViewEventsDisabled : true,
+        ft3DayAttribution: false, 
+        masValidUtmSourceList: "", 
+        masUtmStorageLifetime: "4320", 
+        isCountrySelectorEnabled: false,
+        countrySelectorPosition: "left",
+        allowedCountries: [],
+        updateCartStockAttribute:  false,
+        fulfillmentConstraintErrorHandling:  true,
+        fulfillmentConstraintSetCartAttributeForNonOperatedCountries:  false,
+        isLegacyAnalyticsSDKEnabled: true,
+        isAnalyticsSDKEnabled:true,
+    
+};
+// Version latest
+function GlobaleApp() {
+    this.init();
+}
+
+GlobaleApp.prototype = (function () {
+    var self = this;
+    var events = {
+        onXHRRequest: "onXHRRequest"
+    };
+
+    var initGlobale = function (merchantId){
+        if(!window.GlobalE){
+            window.GlobalE = {};
+        }
+
+        window.GlobalE.MandatoryConsentGroups = {
+            Essentials: 1,
+            Analytics: 2,
+            Marketing: 3,
+        }
+
+        window.GlobalE.ConsentPermissions = {
+            NotAllowed: 0,
+            Allowed: 1
+        }
+
+        window.GlobalE.MerchantID = merchantId;
+        window.GlobalE.NECDisabled = false;
+        window.GlobalE.LogErrors = true;
+        window.GlobalE.IsCookieConsentScriptLoaded = false;
+        window.GlobalE.GE_CONSENT_COOKIE = "GlobalE_Consent";
+        window.GlobalE.GE_UTM_PARAMS_SESSION_STORAGE = "GE_UTM_PARAMS";
+        window.GlobalE.GE_CT_COOKIE = "GlobalE_CT_Data";
+        window.GlobalE.GE_CT_TRACKED = "GlobalE_CT_Tracked";
+        window.GlobalE.TAGS_COOKIE = [
+            "GlobalE_AB_Data",
+            "GlobalE_Ref",
+            "GlobalE_sess_ID",
+            "_ga", "_gcl_au", "_gid", "cid", "_fbp",
+            "_VWO",
+            "_vwo_uuid_v2",
+            "_vwo_ssm",
+            "fs_uid",
+            "fs_cid",
+            "fs_session",
+            "fs_csrftoken",
+            "fs_trusted_device",
+            "fs_last_activity",
+            "_fs_tab_id",
+            "raygun4js-sid",
+            "raygun4js-userid"
+        ];
+        window.GlobalE.GE_ESSENTIALS_ONLY = "GE_ESSENTIALS_ONLY";
+
+        window.GlobalE.IsUndefined = function (obj) {
+            if (typeof obj == "undefined" || obj == null)
+                return true;
+            else
+                return false;
+        }
+
+        window.GlobalE.IsUndefinedOrEmpty = function (obj) {
+            if (window.GlobalE.IsUndefined(obj)) return true;
+            if (typeof obj == "string" && obj == "") return true;
+            return false;
+        }
+
+        window.GlobalE.HandleError = function (ex, f) {
+            if (window.GlobalE.LogErrors) {
+                console.log("Exception in GEClient." + f + " : " + ex.message);
+            }
+        }
+
+        window.GlobalE.GetCookie = function (c_name, isJson) {
+            try {
+                var c_value = document.cookie;
+                var c_start = c_value.indexOf(" " + c_name + "=");
+                if (c_start == -1) {
+                    c_start = c_value.indexOf(c_name + "=");
+                }
+                if (c_start == -1) {
+                    c_value = null;
+                }
+                else {
+                    c_start = c_value.indexOf("=", c_start) + 1;
+                    var c_end = c_value.indexOf(";", c_start);
+                    if (c_end == -1) {
+                        c_end = c_value.length;
+                    }
+                    c_value = unescape(c_value.substring(c_start, c_end));
+                }
+
+                if (!window.GlobalE.IsUndefined(isJson) && isJson) {
+                    return JSON.parse(c_value);
+                }
+
+                return c_value;
+            }
+            catch (ex) {
+                window.GlobalE.HandleError(ex, "GetCookie");
+            }
+        }
+
+        window.GlobalE.SetCookie = function (c_name, value, expire, isJson, isMinutes, setExpireAsSession) {
+            try {
+                if (window.GlobalE.CookieDomain == null) {
+                    window.GlobalE.CookieDomain = document.domain;
+                }
+                if (!window.GlobalE.IsUndefined(isJson) && isJson) {
+                    value = JSON.stringify(value);
+                }
+                var c_value = "";
+                if (!setExpireAsSession) {
+                    var exdate = new Date();
+                    if (!isMinutes)
+                        exdate.setDate(exdate.getDate() + expire);
+                    else
+                        exdate.setTime(exdate.getTime() + expire * 60 * 1000);
+
+                    c_value = escape(value) + ((expire == null) ? "" : "; expires=" + exdate.toUTCString()) + ";domain=" + window.GlobalE.CookieDomain + ";path=/";
+                } else {
+                    c_value = escape(value) + ";domain=" + this.CookieDomain + ";path=/";
+                }
+
+                document.cookie = c_name + "=" + c_value;
+            }
+            catch (ex) {
+                window.GlobalE.HandleError(ex, "SetCookie");
+            }
+        }
+
+        window.GlobalE.EraseCookie = function (name) {
+            if (window.GlobalE.CookieDomain == null) {
+                window.GlobalE.CookieDomain = document.domain;
+            }
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;domain=" + window.GlobalE.CookieDomain + ";path=/";
+        }
+
+        window.GlobalE.IsAnalyticsAllowed = function () {
+            return window.GlobalE.IsGroupAllowed(window.GlobalE.MandatoryConsentGroups.Analytics);
+        }
+
+        window.GlobalE.IsMarketingAllowed = function () {
+            return window.GlobalE.IsGroupAllowed(window.GlobalE.MandatoryConsentGroups.Marketing);
+        }
+
+        window.GlobalE.IsGroupAllowed = function (groupId) {
+            if (groupId == window.GlobalE.MandatoryConsentGroups.Essentials) {
+                return true;
+            }
+
+            try {
+                var groups = window.GlobalE.GetConsentGroupsFromCookie();
+                if (Object.keys(groups).length === 0) {
+                    return false;
+                }
+
+                var groupPermission = groups[groupId];
+
+                if (groupPermission != null && groupPermission == window.GlobalE.ConsentPermissions.Allowed) {
+                    return true;
+                }
+                return false;
+
+            } catch (ex) {
+                return false;
+            }
+        }
+
+        window.GlobalE.GetConsentGroupsFromCookie = function () {
+            var groups = {};
+
+            try {
+                var cookieValue = window.GlobalE.GetCookie(window.GlobalE.GE_CONSENT_COOKIE, true);
+
+                if (typeof cookieValue != undefined &&
+                    cookieValue != null &&
+                    cookieValue != "" &&
+                    cookieValue.groups != null)
+                {
+                    Object.keys(cookieValue.groups).forEach(function (key) {
+                        groups[key] = cookieValue.groups[key];
+                    });
+                }
+
+                return groups;
+            } catch (ex) {
+                return groups;
+            }
+        }
+
+        window.GlobalE.DisableNEC = function (expirationDays) {
+            //    enabled = this.IsUndefined(enabled) ? true : enabled;
+            window.GlobalE.SetCookie(window.GlobalE.GE_ESSENTIALS_ONLY, true, expirationDays, true);
+            //delete all none essentials cookie
+            window.GlobalE.EraseCookie(window.GlobalE.GE_CT_TRACKED);
+            window.GlobalE.EraseCookie(window.GlobalE.GE_CT_COOKIE);
+            window.GlobalE.EraseCookie(self.trackingCookieName);
+            window.GlobalE.TAGS_COOKIE.forEach(function (cookie){
+                var value = self.utils.getCookie(cookie);
+                if(value) {
+                    window.GlobalE.EraseCookie(cookie);
+                }
+            });
+        }
+
+        window.GlobalE.ForceCleanCookies = function () {
+            if (window.GlobalE.NECDisabled) { //global setting that allows merchants to entirely disable NEC
+                var sesCookie = self.utils.getCookie(window.GlobalE.GE_CT_COOKIE, true);
+                var trackCookie = self.utils.getCookie(window.GlobalE.GE_CT_TRACKED, true);
+                var trackingCookie = self.utils.getCookie(self.trackingCookieName);
+
+                var tags = false;
+                window.GlobalE.TAGS_COOKIE.forEach(function (cookie){
+                    if(!tags){
+                        var value = self.utils.getCookie(cookie);
+                        if(value){
+                            tags = true;
+                        }
+                    }
+                });
+
+
+                if (sesCookie != null || trackCookie != null || trackingCookie != null || tags) {
+                    //cookie exists from older sessions, clear
+                    window.GlobalE.DisableNEC(365);
+                }
+            }
+        }
+
+        window.GlobalE.AreNoneEseentialCookieAllowed = function (callback) {
+            if (typeof GECC != "undefined" && typeof GECC.IsAllowed != "undefined") {
+                GECC.IsAllowed(function (response) {
+                    var expiration = typeof response.consentexpiration == "number" ? response.consentexpiration : 365;
+
+                    if (typeof response.allow == "boolean") {
+
+                        callback({ allow: response.allow, expiration: expiration });
+                    }
+                    else {
+                        callback({ allow: undefined, expiration: expiration });
+                    }
+                });
+            }
+            else {
+                callback({ allow: undefined, expiration: 365 });
+            }
+        }
+
+        window.GlobalE.IsNECAllowed = function (callback) {
+            if (window.GlobalE.NECDisabled) {
+                callback(false);
+            }
+            else {
+                window.GlobalE.AreNoneEseentialCookieAllowed(function (ccresponse) {
+                    var necValueStr = window.GlobalE.GetCookie(window.GlobalE.GE_ESSENTIALS_ONLY, false);
+                    if (necValueStr != null) {
+                        try {
+                            var necOnly = necValueStr == "true";
+                            if (ccresponse.allow != undefined && ccresponse.allow != !necOnly) {
+                                //cookie value consent is different from consent script logic, in this case , we overrite cookie value with consent script respone
+                                window.GlobalE.SetCookie(window.GlobalE.GE_ESSENTIALS_ONLY, !ccresponse.allow, ccresponse.expiration, true);
+                                callback(ccresponse.allow);
+                            }
+                            else {
+                                //consent script retuened same value as cookie , or was undefined, in this case we return cookie value
+                                callback(!necOnly);
+                            }
+                        }
+                        catch (err) {
+                            callback(true);
+                        }
+                    }
+                    else {
+                        //check merchant cookie consent
+                        if (typeof ccresponse != "undefined" &&
+                            typeof ccresponse.allow == "boolean" && ccresponse.allow == false) {
+                            //block cookies
+                            window.GlobalE.DisableNEC(ccresponse.expiration);
+                            callback(false);
+                        }
+                        else {
+                            callback(true);//default true
+                        }
+                    }
+
+                });
+            }
+        }
+
+        window.GlobalE.TryToGetConsentProviderId = function () {
+            var providerId = 0
+
+            try {
+                var optanonConsentStr = self.utils.getCookie("OptanonConsent", false);
+
+                //Identify OneTrust by global obj
+                if (typeof OneTrust !== "undefined" && OneTrust != null) {
+                    return 2;
+                }
+
+                //Identify OneTrust by cookie
+                if (optanonConsentStr != null && optanonConsentStr.length > 0) {
+                    return 2;
+                }
+                return providerId;
+            } catch (e) {
+                return providerId;
+            }
+        };
+
+        window.GlobalE.GetCookieConsentScript = function (isCheckoutPage, callback) {
+            if (window.GlobalE.IsCookieConsentScriptLoaded) {
+                return;
+            }
+
+            try {
+                var identifiedProviderId = window.GlobalE.TryToGetConsentProviderId();
+
+                var url = self.geCDNUrl + 'merchant/cookieConsentScript?merchantId=' + self.merchantId + "&country=" + self.countryCode + "&culture=" + "&providerId=" + identifiedProviderId ;
+
+                var cacheBuster = Math.floor((new Date()).getTime() / (1000 * 60 * 10)) //cache for 10 min
+                url += "&cb=" + cacheBuster;
+                self.utils.getScript(url).then(function () {
+                    try {
+                        window.GEConsent = new GECCV2();
+                        window.GEConsent.Init(isCheckoutPage);
+                        window.GlobalE.IsCookieConsentScriptLoaded = true;
+
+                        if (!window.GlobalE.IsAnalyticsAllowed()) {
+                            window.GlobalE.NECDisabled = true;
+                            window.GlobalE.ForceCleanCookies();
+                        } else {
+                            callback();
+                        }
+
+                    }
+                    catch (e) {
+                    }
+                });
+            } catch (e) {
+            }
+        }
+
+        window.GlobalE.GetCookieConsentScript(false, function () {
+            window.GlobalE.SaveUTMData();
+            window.gleTags.Track();
+        });
+        
+        window.GlobalE.GetCDNUrl = function () {
+            //var cdnEnabled = GlobalE.MPH.Get(MPH.K.CDNEnabled, MPH.T.Bool);
+
+            //var url = GlobalE.MPH.Get(MPH.K.CDNUrl, MPH.T.String);
+            var url = GLBE_PARAMS.geCDNUrl;
+            // if (url == null || !cdnEnabled) {
+            //     url = this.GEBaseURL;
+            // }
+
+            var valid = url.indexOf("/", url.length - 1) !== -1;
+            if (!valid) url += "/";
+
+            return url;
+        }
+
+        window.GlobalE.WriteLog = function (message1, message2, handler, identifier, isEnableClientLogs, isError) {
+            try {
+
+                if (!isEnableClientLogs) {
+                    return;
+                }
+
+                if (message2 !== null) {
+                    message1 += message2;
+                }
+
+                var url = GlobalE.GetCDNUrl();
+
+                url = url + "shared/WriteLog?message=" + message1 + "&handler=" + handler + "&identifier=" + identifier + "&iserror=" + isError;
+
+                var iframe = document.getElementById("ge_srv_log");
+                if (!iframe) {
+                    iframe = document.createElement("iframe");
+                    iframe.setAttribute("id", "ge_srv_log");
+                    iframe.setAttribute("title", "ge_srv_log");
+                    iframe.setAttribute("width", "1px");
+                    iframe.setAttribute("height", "1px");
+                    iframe.style.display = "none";
+                    document.getElementsByTagName("body")[0].appendChild(iframe);
+                }
+                iframe.setAttribute("src", url);
+            }
+            catch (e) {
+            }
+        }
+
+        window.GlobalE.GetUTMData = function () {
+            var utmParamsFromQuery = null;
+
+            utmParamsFromQuery = localStorage.getItem(this.GE_UTM_PARAMS_SESSION_STORAGE);
+            if (utmParamsFromQuery) {
+                utmParamsFromQuery = JSON.parse(utmParamsFromQuery);
+                //check if expired, take from session
+                if (new Date(utmParamsFromQuery.expiry) < new Date())
+                {
+                    localStorage.removeItem(this.GE_UTM_PARAMS_SESSION_STORAGE);
+                    utmParamsFromQuery = null; 
+                }
+            }
+            
+            if (!utmParamsFromQuery) { 
+                var sessionValue = sessionStorage.getItem(this.GE_UTM_PARAMS_SESSION_STORAGE);
+                if (sessionValue) {
+                    utmParamsFromQuery =
+                    {
+                        value: sessionValue,
+                        expiry: null
+                    };
+                }
+            }
+        
+            return utmParamsFromQuery;
+        }
+
+        // Get UTM data from the URL and save it on session storage if exists
+        // then create Iframe that saves the data on session storage.
+        // The Iframe will be created oif analytics is allow by cookie consent and the UTM data exists.
+        window.GlobalE.SaveUTMData = function (isEnableClientLogs, isError) {
+            try {
+
+                //removing the check for cookie consent since there are no personal details
+                // Try to get UTM parameters from cookies/session storage to avoid saving them again.
+                var utmParamsFromQuery = window.GlobalE.GetUTMData();
+
+                var utmParamsFromUrl = window.GlobalE.GetUtmParams(window.location.search);
+                var utmParamsFromUrlObj = parseUtmFromQueryString(utmParamsFromUrl);
+
+                var is3DASourceAndActive = self.ft3DayAttribution && JSON.parse(self.masValidUtmSourceList)?.some(utmSource => utmSource.toLowerCase() === utmParamsFromUrlObj.utmSource?.toLowerCase());
+
+                // Exit function if UTM parameters found.
+                if (!this.IsUndefined(utmParamsFromQuery) && !is3DASourceAndActive){
+                    return;
+                }
+
+                // Parse URL for UTM params and exit if no params found.
+                utmParamsFromQuery = this.SetTrafficSourceParams();
+                if (utmParamsFromQuery === null) {
+                    return;
+                }
+
+                if (is3DASourceAndActive) {
+                    var storedItem = {
+                        value: utmParamsFromQuery,
+                        expiry: new Date(new Date().getTime() + self.masUtmStorageLifetime * 60000)
+                    };
+
+                    localStorage.setItem(this.GE_UTM_PARAMS_SESSION_STORAGE, JSON.stringify(storedItem));
+                } else {
+                    sessionStorage.setItem(this.GE_UTM_PARAMS_SESSION_STORAGE, utmParamsFromQuery);
+                }
+            }
+            catch (err) {
+                var msg = "GEClient.SaveUTMData failed with " + err.message + ";MerchantId:" + GlobalE.MerchantID;
+                var safeLog = GlobalE.SafeExecute(GlobalE.WriteLog);
+                safeLog("SaveUTMData logs:", msg, "MerchantClientSDK", GlobalE.MerchantID, true, true);
+            }
+        }
+
+        function parseUtmFromQueryString(queryString) {
+            var urlParams = new URLSearchParams(queryString);
+            var utmParams = {
+                utmSource: urlParams.has('utm_source') ? urlParams.get('utm_source') : null,
+                utmMedium: urlParams.has('utm_medium') ? urlParams.get('utm_medium') : null,
+                utmCampaign: urlParams.has('utm_campaign') ? urlParams.get('utm_campaign') : null
+            };
+
+            return utmParams;
+        }
+
+        // Flow of searching the UTM params
+        window.GlobalE.SetTrafficSourceParams = function() {
+            var self = this;
+            try{
+                // Get the query string from the URL.
+                var queryString = window.location.search;
+
+                if(!self.IsUndefinedOrEmpty(queryString)) {
+                    // first check for the Google click ID (gclid) parameter.
+                    var urlObj = new URL(window.location.href);
+                    var gclidValue = urlObj.searchParams.get("gclid");
+                    if(gclidValue != null) {
+                        return "gclid="+gclidValue;
+                    }
+
+                    var utmParams = self.GetUtmParams(queryString);
+                    if(utmParams != null) {
+                        return utmParams;
+                    }
+                }
+
+                // Get document.referrer and return it only if it is different from current site domain
+                var documentReferrer = gleTags.GetReferrer();
+                if(!self.IsUndefinedOrEmpty(documentReferrer)) {
+                    if(documentReferrer.includes('google')) {
+                        return "utm_source=google&utm_medium=organic&utm_campaign=(not-set)";
+                    } else{
+                        var referrerToReport = gleTags.GetDomain(document.referrer);
+                        return "utm_source=" + referrerToReport + "&utm_medium=referral&utm_campaign=(not-set)";
+                    }
+                }
+
+                return "utm_source=direct&utm_medium=(none)&utm_campaign=(not-set)";
+            }
+            catch (err) {
+                var msg = "GEClient.setTrafficSourceParams failed with " + err.message + ";MerchantId:" + GlobalE.MerchantID;
+                var safeLog = GlobalE.SafeExecute(GlobalE.WriteLog);
+                safeLog("setTrafficSourceParams logs:", msg, "MerchantClientSDK", GlobalE.MerchantID, true, true);
+                return null;
+            }
+
+        }
+
+        // returns the value of the "utm" query string parameters if exists otherwise returns null.
+        window.GlobalE.GetUtmParams = function(queryString) {
+            if (!queryString) return null;
+
+            try {
+
+                // Remove '?' from begin
+                queryString = queryString.slice(1);
+
+                // Split the query string into parameters.
+                var params = queryString.split('&');
+
+                // Iterate over the parameters and find the UTM params.
+                var utmParams = [];
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    var keyValue = param.split('=');
+                    var key = keyValue[0];
+                    var value = keyValue[1];
+
+                    if (key.startsWith('utm_')) {
+                        utmParams.push(key + '=' + value);
+                    }
+                }
+
+                // If there are no UTM params, return null.
+                if (utmParams.length === 0) {
+                    return null;
+                }
+
+                // Join the UTM params into a query string.
+                return utmParams.join('&');
+            }
+            catch (err) {
+                var msg = "GEClient.GetUtmParams failed with " + err.message + ";MerchantId:" + GlobalE.MerchantID;
+                var safeLog = GlobalE.SafeExecute(GlobalE.WriteLog);
+                safeLog("GetUtmParams logs:", msg, "MerchantClientSDK", GlobalE.MerchantID, true, true);
+                return null;
+            }
+        }
+
+        // POC for MixedPanel We add the UTM params to the URL
+        window.GlobalE.SetMixPanelUTMParams = function (url) {
+            // Example of possible value in session storage: 
+            // 1) utm_source=google&utm_medium=organic&utm_campaign=(not-set)
+            // 2) gclid=gclidValue"
+           
+            try{
+                var geUtmValue = window.GlobalE.GetUTMData();
+                
+
+                if(!GlobalE.IsUndefinedOrEmpty(geUtmValue)) {
+                    // Split the query string into parameters.
+                    var params = geUtmValue.value.split('&');
+
+                    // Iterate over the parameters and find the UTM params.
+                    for (var i = 0; i < params.length; i++) {
+                        var param = params[i];
+                        var keyValue = param.split('=');
+                        var key = keyValue[0];
+                        var value = keyValue[1];
+
+                        if (key.startsWith('gclid')) {
+                            url = self.utils.addParameter(url, 'gclid', value);
+                        }
+                        if (key.startsWith('utm_source')) {
+                            url = self.utils.addParameter(url, 'cs', value);
+                        }
+                        if (key.startsWith('utm_medium')) {
+                            url = self.utils.addParameter(url, 'cm', value);
+                        }
+                        if (key.startsWith('utm_campaign')) {
+                            url = self.utils.addParameter(url, 'cn', value);
+                        }
+
+                        //utm_term and utm_content: to be implemented
+                    }
+                }
+
+                return url;
+            }catch (e) {
+                var safeLog = GlobalE.SafeExecute(GlobalE.WriteLog);
+                safeLog("SetMixPanelUTMParams:", e.message + ";MerchantId: " + GlobalE.MerchantID, "MerchantClientSDK", GlobalE.MerchantID, true, true);
+                return url;
+            }
+        }
+
+        window.GlobalE.SafeExecute = function (func) {
+            return function () {
+                try {
+                    return func.apply(this, arguments);
+                }
+                catch (e) {
+                    console.log('SafeExecute ex: ' + e);
+                }
+            };
+        };
+
+        if(!window.gleTags){
+            window.gleTags = {};
+        }
+
+        //extract UTM tags
+        window.gleTags.GetReferrer = function () {
+            //handle referer
+            if (document.referrer != "") {
+                //referrer exists - check that its different from current domain
+                if (window.gleTags.GetDomain(document.location.href) != window.gleTags.GetDomain(document.referrer)) {
+                    //referer exists and not a local referer - REPORT
+                    //url = GlobalE.AddParameter(url, "dr", document.referrer);            
+                    return document.referrer;
+                }
+            }
+
+            return null;
+        }
+        window.gleTags.GetHostName = function (url) {
+            var match = url.match(/:\/\/(www[0-9]?\.)?(.[^/:]+)/i);
+            if (match != null && match.length > 2 && typeof match[2] === 'string' && match[2].length > 0) {
+                return match[2];
+            }
+            else {
+                return null;
+            }
+        }
+        window.gleTags.GetDomain = function (url) {
+
+            var hostName = window.gleTags.GetHostName(url);
+            var domain = hostName;
+
+            if (hostName != null) {
+                var parts = hostName.split('.').reverse();
+
+                if (parts != null && parts.length > 1) {
+                    domain = parts[1] + '.' + parts[0];
+
+                    if (hostName.toLowerCase().indexOf('.co.uk') != -1 && parts.length > 2) {
+                        domain = parts[2] + '.' + domain;
+                    }
+                }
+            }
+
+            return domain;
+        }
+
+        window.gleTags.GetReferrerToReport = function () {
+            var referrer = document.referrer;
+            if (referrer) {
+                var referrer = self.utils.parseUrl(document.referrer).hostname;
+                if (referrer == document.location.hostname) {
+                    return null;
+                }
+                var storedRef = self.utils.getCookie(self.referreCookieName);
+                if (storedRef && referrer == storedRef) {
+                    return null;
+                }
+                return referrer;
+            }
+            return null;
+        };
+
+        window.gleTags.SaveReferrer = function () {
+            var referrer = window.gleTags.GetReferrer();
+            if (referrer != null) {
+                GlobalE.SetCookie(self.referreCookieName, referrer, 30, false, true);
+            }
+        }
+
+        window.gleTags.GetHitCount = function () {
+            if (sessionStorage) {
+                var count = sessionStorage.getItem(self.hitInfoKey);
+                if (count) {
+                    try {
+                        return parseInt(count);
+                    }
+                    catch (err) {
+                        return 0;
+                    }
+                }
+                return 0;
+            }
+            else {
+                return 0;
+            }
+        }
+
+        window.gleTags.UpdateHitCount = function (count) {
+            if (sessionStorage) {
+                sessionStorage.setItem(self.hitInfoKey, count);
+            }
+        }
+
+        window.gleTags.GetSessionUID = function () {
+            var uid = self.utils.getCookie(self.trackingCookieName);
+            var jsonUid = !uid? null: tryParseJSONObject(uid); 
+            if (!self.useBrowsingStartEventInsteadOfPageViewed && uid && !jsonUid)
+            {
+                jsonUid = {sid:uid, expiry:null};
+                
+            }
+            var isNew = false;
+            if (!jsonUid || (jsonUid.expiry && new Date(jsonUid.expiry) < new Date()))  {
+                isNew = true;
+            }
+            return { id: !isNew ? jsonUid?.sid : null, isNew: isNew };
+        }
+
+        function tryParseJSONObject (jsonString){
+            try {
+                var o = JSON.parse(jsonString);
+                if (o && typeof o === "object") {
+                    return o;
+                }
+            }
+            catch (e) { }
+
+            return null;
+        };
+
+        window.gleTags.CreateSessionUID = function ()
+        {
+            var generator = function (min, max) {
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            }
+            var maxGen = 999999999;
+            var minGen = 100000000;
+            var leftPart = generator(minGen, maxGen);
+            var rightPart = generator(minGen, maxGen);
+            uid = leftPart + "." + rightPart;
+            uid += "." + self.merchantId;
+
+            return uid;
+        }
+      
+        window.gleTags.SetSessionUID = function (sid) {
+            if (self.useBrowsingStartEventInsteadOfPageViewed)
+            {
+                self.utils.setCookie(self.trackingCookieName, {"sid": sid, "expiry": new Date(new Date().getTime() + 30 * 60000)}, 365 * 2, true);
+
+            }
+            else
+            {
+                self.utils.setCookie(self.trackingCookieName, sid, 365 * 2, false);
+            }
+          }
+
+        window.gleTags.Track = async function () {
+            try {
+                if (self.pixelEnabled) {
+                    var uid = window.gleTags.GetSessionUID();
+                    if (!uid.id) { //here we create a new SID 
+                        uid.id = window.gleTags.CreateSessionUID();
+                       
+                    }
+                    var hits = window.gleTags.GetHitCount();
+                    var environment = self.environment == "Production" ? "live" : "local";
+                    var baseUrl = self.pixelUrl + "/set";
+                    var doLog = self.utils.getQueryParam("gatracklog") != null ? self.utils.getQueryParam("gatracklog") : "false";
+                    var url =baseUrl;
+                    var addNewCountryLogicSession = false;
+                    if (self.useBrowsingStartEventInsteadOfPageViewed && uid.isNew) {
+                        url = self.utils.addParameter(baseUrl, "t", "Browsing Start")
+                        let result = await fetch(window.Shopify.routes.root + 'browsing_context_suggestions.json' + '?country[enabled]=true' + `&country[exclude]=${window.Shopify.country}` + '&language[enabled]=true' + `&language[exclude]=${window.Shopify.language}`).then(r => r.json());
+                        url = self.utils.addParameter(url, "co", result.detected_values.country.handle);
+
+                        //1.New Country != Old Country
+                        //2.Old Country is not an operated country
+                        if (result.detected_values.country.handle!= self.countryCode && !isCountryOperated(self.countryCode ))
+                        {
+                            addNewCountryLogicSession = true;
+                        }
+                    }
+                    else
+                    {
+                        if (!self.isAnalyticsPageViewEventsDisabled)
+                        {
+                            url = self.utils.addParameter(baseUrl, "t", "pv");
+                        }
+                        url = self.utils.addParameter(url, "co", self.countryCode);
+                    }
+                if (!self.isAnalyticsPageViewEventsDisabled ||
+                    (self.useBrowsingStartEventInsteadOfPageViewed && uid.isNew))
+                {
+                    url = self.utils.addParameter(url, "sid", uid.id);
+                    var locationUrl = location.href;
+                    if (addNewCountryLogicSession)
+                    {
+                        locationUrl = self.utils.addParameter(locationUrl, "NewCountryLogicSession", "true");
+                    }
+                    url = self.utils.addParameter(url, "p",encodeURIComponent(locationUrl));
+                    url = self.utils.addParameter(url, "ti", document.title);
+                    url = self.utils.addParameter(url, "e", environment);
+                    url = self.utils.addParameter(url, "hc", hits.toString());
+                    url = self.utils.addParameter(url, "log", doLog);
+                    url = self.utils.addParameter(url, "m", self.merchantId);
+                    url = self.utils.addParameter(url, "cdu", self.geCDNUrl);
+                    url = self.utils.addParameter(url, "f", "gleTags.handlePixelResponse");
+                    url = self.utils.addParameter(url, "mpups", isMixpanelUserProfileSetupNeeded());
+
+                    var referrer = window.gleTags.GetReferrerToReport();
+                    if (referrer) {
+                        url = self.utils.addParameter(url, "dr", encodeURIComponent(referrer));
+                        self.utils.setCookie(self.referreCookieName, referrer, 30, false, true);
+                    }
+
+                    window.gleTags.SaveReferrer();
+
+                    // POC for MixedPanel We add the UTM params to the URL
+                     url = GlobalE.SetMixPanelUTMParams(url);
+                   
+                    var i = document.createElement("img");
+                    i.width = 1;
+                    i.height = 1;
+                    i.src = url;
+                }
+                    
+                    window.gleTags.SetSessionUID(uid.id);
+                    window.gleTags.UpdateHitCount(++hits);
+
+                    function isMixpanelUserProfileSetupNeeded() {
+                        const isSetupNeeded = { no: "0", yes: "1" }
+                        const key = "GEMPUPS";
+                        const value = sessionStorage.getItem(key);
+
+                        // if record in session storage doesn't exist or set to yes, 
+                        // then return positive result and switch of the trigger
+                        if (value === null || value ===  isSetupNeeded.yes) {
+                            sessionStorage.setItem(key, isSetupNeeded.no);
+                            return isSetupNeeded.yes;
+                        }
+
+                        // otherwise no setup needed
+                        return isSetupNeeded.no;
+                    }
+                }
+            }
+            catch (err) {
+                console.log('glbe error:', err);
+            }
+        };
+
+        
+    }
+
+    var initFreeShippingBanner = function () {
+        //SHE-12408 Thank you page 
+        if(typeof Shopify != "undefined" && typeof Shopify.Checkout != "undefined")
+            return;
+
+        //add missing gleTags function
+        if (window.gleTags) //handle existing GEM integration
+        {
+            window.gleTags.freeShippingBannerShowed = function () { };
+        }
+        else {
+            window.gleTags = {
+                freeShippingBannerShowed: function () { }
+            };
+        }
+
+        if (window.GlobalE)//handle existing GEM integration
+            window.GlobalE.IsMobile = false;
+        else
+            window.GlobalE = { IsMobile: false };
+
+        var url = self.geCDNUrl + 'merchant/freeShippingBanner?merchantId=' + self.merchantId + "&country=" + self.countryCode + "&currency=" + self.currencyCode + "&culture=";
+        var cacheBuster = Math.floor((new Date()).getTime() / (1000 * 60 * 10)) //cache for 10 min
+        url += "&cb=" + cacheBuster;
+        self.utils.getScript(url);
+    };
+
+    var initRestrictions = function () {
+        if (isCountryOperated(self.countryCode)) {
+            self.utils.contentLoaded(window, function () {
+                if (document.location.pathname == '/cart') {
+                    self.utils.httpRequest("/cart.js", {
+                        method: "GET",
+                        contentType: "application/json"
+                    }).then(function (cart) {
+                        var variants = cart.items.map(function (i) { return 'productCode=' + i.variant_id; });
+                        var query = 'encMerchantId=' + self.merchantCode + '&countryCode=' + self.countryCode + '&' + variants.join('&');
+                        self.utils.httpRequest(self.apiUrl + "browsing/ProductCountryS?" + query, {
+                            method: "POST",
+                            contentType: "application/json"
+                        }).then(function (response) {
+                            var restricted = response.filter(function (e) { return e.IsRestricted || e.IsForbidden }).map(function (e) { return e.ProductCode })
+                            if (restricted.length) {
+                                var restrctedProducts = cart.items.filter(function (p) {
+                                    return restricted.indexOf(p.variant_id.toString()) > -1;
+                                }).map(function (p) {
+                                    return p.product_title;
+                                });
+                                var notification = self.utils.notification('The following item(s) cannot be shipped to your country:\n' + restrctedProducts.join('\n') + '\nPlease edit your shopping cart to continue', 'warning');
+                                var checkoutBtns = document.querySelectorAll('form[action$="/cart"] [type="submit"]');
+                                checkoutBtns.forEach(function (b) { b.disabled = true });
+                                self.utils.addListener(events.onXHRRequest, function (e) {
+                                    var cartChangeUrls = ["/add.js", "/update.js", "/change.js"];
+                                    var changed = false;
+                                    for (var i = 0; i < cartChangeUrls.length; i++) {
+                                        if (e.url.indexOf(cartChangeUrls[i]) > -1) {
+                                            changed = true;
+                                        }
+                                    }
+                                    if (changed) {
+                                        self.utils.httpRequest("/cart.js", {
+                                            method: "GET",
+                                            contentType: "application/json"
+                                        }).then(function (cart) {
+                                            var restrctedProducts = cart.items.filter(function (p) {
+                                                return restricted.indexOf(p.variant_id.toString()) > -1;
+                                            });
+                                            if (restrctedProducts.length === 0) {
+                                                notification.parentElement.removeChild(notification);
+                                                checkoutBtns.forEach(function (b) { b.disabled = false; });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }).catch(function(error){
+                        //ignore error. Endpoint might not exists on the headless merchant.
+                    });
+                }
+                else {
+                    let variants = typeof window.meta !== 'undefined' && window.meta.product && window.meta.product.variants;
+                    if (variants) {
+                        var query = 'encMerchantId=' + self.merchantCode + '&countryCode=' + self.countryCode + '&' + variants.map(function (v) { return 'productCode=' + v.id }).join('&');
+                        self.utils.httpRequest(self.apiUrl + "browsing/ProductCountryS?" + query, {
+                            method: "POST",
+                            contentType: "application/json"
+                        }).then(function (response) {
+                            var isRestricted = !!response.filter(function (e) { return e.IsRestricted || e.IsForbidden }).length;
+                            if (isRestricted) {
+                                document.querySelectorAll('[action$="/cart/add"]').forEach(function (e) {
+                                    e.style.display = 'none';
+                                });
+                                self.utils.notification('This product cannot be shipped to your country', 'warning');
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    };
+
+    var isCountryOperated = function (countryCode) {
+        return self.operatedCountries.indexOf(countryCode) > -1
+    };
+
+    var addStyles = function () {
+        var cssLinkUrl = GLBE_PARAMS.appUrl + "resources\/css\/" + GLBE_PARAMS.mid + "\/" + GLBE_PARAMS.countryCode;
+
+        if(self.utils.isLinkAdded(cssLinkUrl))  //can be already added in liquid file
+            return;
+
+        var cssElement = document.createElement('link');
+        cssElement.rel = "stylesheet";
+        cssElement.type = "text/css"
+        cssElement.href = cssLinkUrl;
+        document.getElementsByTagName('head')[0].appendChild(cssElement);
+
+        if (!isCountryOperated(self.countryCode))
+            return;
+
+        //to add common styles faster
+        var styles = `
+/* hide express buttons for GE operated countries */
+.additional-checkout-buttons,
+[data-shopify="payment-button"]
+[data-alternative-payments],
+[data-testid="GooglePay-button"],
+[data-testid="ShopifyPay-button"],
+iframe[title="Checkout with PayPal"],
+.ge-hide-display-none {
+display: none;
+}
+
+/* Hide shop pay checkout modal */
+#shopify-pay-modal {
+display: none !important;
+}
+
+.ge-hide, .shopify-payment-button, .afterpay-paragraph, form[action='https://payments.amazon.com/checkout/signin'], .ProductMeta__Klarna, div.ProductMeta div.Affirm {
+visibility: hidden;
+}
+`;
+        var styleSheet = document.createElement("style")
+        styleSheet.innerHTML = styles
+        document.head.appendChild(styleSheet)
+    };
+
+    var setXHRListener = function () {
+        var _open = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function (method, url) {
+            if (!this.isGlobalE) {
+                this.addEventListener('load', function () {
+                    self.utils.emitEvent(events.onXHRRequest, { xhr: this, url: url });
+                });
+            }
+            _open.apply(this, arguments);
+        };
+
+        const _fetch = fetch;
+        fetch = function (resource, initOptions) {
+            const url = resource instanceof Request ? resource.url : resource.toString();
+            if (!this.isGlobalE) {
+                return _fetch(resource, initOptions).then(function (res) {
+                    self.utils.emitEvent(events.onXHRRequest, { xhr: this, url: url });
+                    return res;
+                });
+            }
+            else {
+                return _fetch(resource, initOptions);
+            }
+        };
+    };
+
+    var createReplacementCookie = function () {
+        var cookieDomain = window.location.hostname; //can require custom value on stores whene checkout page domain is different
+
+        function getParameterByName(name, url = window.location.href) {
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'), results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        function ticksToDate(ticks) {
+            return Number.isInteger(ticks) ? new Date(ticks / 1e+4 + new Date('0001-01-01T00:00:00Z').getTime()) : null;
+        }
+
+        var existingReplacementCookie = document.cookie.split(';').map(function (x) { return x.trim().split('='); }).reduce(function (a, b) { a[b[0]] = b[1]; return a; }, {})['GE_Replacement'];
+        var existingReplacement = null;
+        if (existingReplacementCookie && existingReplacementCookie.length > 0 && existingReplacementCookie != null) {
+            existingReplacement = JSON.parse(decodeURIComponent(existingReplacementCookie));
+        }
+
+        //* If URL contains the query parameter replacementExpire, create cookie GE_Replacement
+        let replacementExpireParam = parseInt(getParameterByName('replacementExpire'));
+        if (replacementExpireParam !== null && replacementExpireParam > Date.now()) {
+            //debugger;
+            var countryCode = getParameterByName('glCountry');
+            var currencyCode = getParameterByName('glCurrency');
+
+            const cookieStringifiedValue = encodeURIComponent(JSON.stringify({ glCountry: countryCode, glCurrency: currencyCode }));
+            const expirationInUTC = ticksToDate(replacementExpireParam).toUTCString();
+
+            document.cookie = 'GE_Replacement=' + cookieStringifiedValue + ';expires=' + expirationInUTC + ';path=/;domain=.' + cookieDomain;
+
+            // Change country and currency
+            if (existingReplacement == null || existingReplacement.glCountry != countryCode || existingReplacement.glCurrency != currencyCode) {
+                if (GLBE_PARAMS.countryCode != countryCode || GLBE_PARAMS.currencyCode != currencyCode) {
+                    const form = document.createElement('form'); form.method = 'post'; form.action = '/localization';
+                    const params = { form_type: 'localization', _method: 'put', return_to: document.location.pathname + document.location.search, country_code: countryCode, currency_code: currencyCode }
+                    for (var key in params) { if (params.hasOwnProperty(key)) { var hiddenField = document.createElement('input'); hiddenField.type = 'hidden'; hiddenField.name = key; hiddenField.value = params[key]; form.appendChild(hiddenField); } }
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+        }
+
+        if (existingReplacement != null) {
+            //detect 404 checkout page. SHE-67, SHE-201
+            var url = window.location.href;
+            var regexp = /(\/[a-z\-]+\/)[0-9]+\/checkouts\/[a-z0-9]+/g;
+            var match = regexp.exec(url);
+            if (match != null) {
+                var newUrl = url.replace(match[1], "/");
+                window.location.href = newUrl;
+            }
+        }
+    };
+
+    var calculatePrice = function (value, fxRate, vatRateTypes, productLocalVatRate, isGrossPrices, currencyDecimalPlaces, quantity,
+                                   productClassCoefficient, priceCoefficient, productCountryVatRate, roundingRules, skipRounding) {
+        if (value == 0)
+            return (0).toFixed(currencyDecimalPlaces);
+        var merchantVatRate = vatRateTypes.localVATRateType.rate / 100;
+        if (productLocalVatRate !== null) {
+            if (productLocalVatRate == 0) {
+                merchantVatRate = 0;
+            } else {
+                merchantVatRate = productLocalVatRate / 100;
+            }
+        }
+        var countryVatRate = vatRateTypes.vatRateType.rate / 100;
+        if (productCountryVatRate || productCountryVatRate === 0) {
+            if (productCountryVatRate == 0) {
+                countryVatRate = 0;
+            } else {
+                countryVatRate = productCountryVatRate / 100;
+            }
+        }
+        if (isGrossPrices) {
+            if (vatRateTypes.includeVATTypeId == 0 || vatRateTypes.includeVATTypeId == 8 || (vatRateTypes.includeVATTypeId == 6 && vatRateTypes.useCountryVAT)) {
+                value = value / (1 + merchantVatRate);
+                if (vatRateTypes.includeVATTypeId == 6) {
+                    value += value * countryVatRate;
+                }
+            }
+        } else {
+            if (vatRateTypes.includeVATTypeId == 2 || vatRateTypes.includeVATTypeId == 4 || vatRateTypes.includeVATTypeId == 6) {
+                if (vatRateTypes.useCountryVAT) {
+                    value += value * countryVatRate;
+                } else {
+                    value += value * merchantVatRate;
+                }
+            }
+        }
+        value = value * fxRate;
+        if (productClassCoefficient) {
+            value = value / priceCoefficient * productClassCoefficient;
+        }
+        value = value.toFixed(currencyDecimalPlaces);
+        if (skipRounding || roundingRules == null) {
+            value = value * quantity;
+        } else {
+            var ranges = roundingRules.roundingRanges;
+            var range = null;
+            for (var r in ranges) {
+                var rg = ranges[r];
+                if (rg.from < value && value <= rg.to) {
+                    range = rg;
+                    break;
+                }
+            }
+            if (range != null) {
+                // convert range to form of absolute
+                range = convertRoundingRangeToAbsolute(value, range);
+                // apply logic of absolute range rounding
+                value = absoluteRounding(value, range) * quantity;
+                if (value < 0) {
+                    value = 0;
+                }
+            }
+        }
+        return value;
+    };
+    var convertRoundingRangeToAbsolute = function (price, range) {
+        var result = null;
+        if (range.rangeBehavior == 1) {
+            // range already has absolute behavior
+            result = range;
+        } else {
+            result = new Object();
+            result.rangeBehavior = range.rangeBehavior;
+            result.roundingExceptions = [];
+            result.from = range.from;
+            result.to = range.to;
+            var int_part = Math.floor(price);
+            if (range.rangeBehavior == 2) {
+                //Relative Decimal
+                result.lowerTarget = int_part - 1 + range.lowerTarget;
+                result.upperTarget = int_part + range.upperTarget;
+                result.threshold = int_part + range.threshold;
+                for (var ex in range.roundingExceptions) {
+                    range.roundingExceptions[ex].exceptionValue += int_part;
+                    result.roundingExceptions.push(range.roundingExceptions[ex]);
+                }
+            } else if (range.rangeBehavior == 3) {
+                // Relative Whole
+                if (range.targetBehaviorHelperValue == 0) {
+                    range.targetBehaviorHelperValue = 10;
+                }
+                var base = Math.floor(price / range.targetBehaviorHelperValue) * range.targetBehaviorHelperValue;
+                result.lowerTarget = base - range.targetBehaviorHelperValue +
+                    range.lowerTarget;
+                result.upperTarget = base + range.upperTarget;
+                result.threshold = base + range.threshold;
+                for (var ex in range.roundingExceptions) {
+                    range.roundingExceptions[ex].exceptionValue += base;
+                    result.roundingExceptions.push(range.roundingExceptions[ex]);
+                }
+            } else if (range.rangeBehavior == 4) {
+                // Nearest target
+                if (range.targetBehaviorHelperValue == 0) {
+                    range.targetBehaviorHelperValue = 5;
+                }
+                var base = Math.floor(price / range.targetBehaviorHelperValue) * range.targetBehaviorHelperValue;
+                result.lowerTarget = base - 1 + range.lowerTarget;
+                result.upperTarget = base - 1 + range.targetBehaviorHelperValue + range.upperTarget;
+                result.threshold = base + range.threshold;
+                for (var ex in range.roundingExceptions) {
+                    range.roundingExceptions[ex].exceptionValue += base;
+                    result.roundingExceptions.push(range.roundingExceptions[ex]);
+                }
+            }
+        }
+
+        return result;
+    };
+    var absoluteRounding = function (price, range) {
+        var result = null;
+        // check exceptions
+        if (range.roundingExceptions.length > 0) {
+            for (var e in range.roundingExceptions) {
+                ex = range.roundingExceptions[e];
+                if (price == ex.exceptionValue) {
+                    result = price;
+                }
+            }
+        }
+        // no exception was found
+        if (!result) {
+            // check threshold
+            if (price < range.threshold) {
+                result = range.lowerTarget;
+            } else {
+                result = range.upperTarget;
+            }
+        }
+        return result;
+    };
+
+    var initGEActive = function () {
+        /* Wait for the DOM to completely loads */
+        function DOMready(callback) {
+            if (document.readyState != 'loading') callback();
+            else document.addEventListener('DOMContentLoaded', callback);
+        }
+        /* Check if the GLBE_PARAMS object exists, then check if country is on the operated countries array */ /* if on operated country, get the body element and add an attribute to it called "ge-active" with the value true otherwise false */
+        DOMready(function () {
+            if (GLBE_PARAMS) {
+                var OperatedCountryArray = GLBE_PARAMS.operatedCountries;
+                var MyCountry = GLBE_PARAMS.countryCode || GLBE_PARAMS.shippingCountry;
+                var geActive = false;
+                var b = document.querySelector("body");
+                for (var i = 0; i < OperatedCountryArray.length; i++) {
+                    if (MyCountry == OperatedCountryArray[i]) {
+                        geActive = true;
+                    }
+                }
+                if (geActive == true) {
+                    b.setAttribute("ge-active", true);
+                } else {
+                    b.setAttribute("ge-active", false);
+                }
+            }
+        });
+    };
+
+    let setCartAttributes = function () {
+        if (!self.c1Enabled)
+            return;
+
+        if (typeof self.suppressCartAttributesUpdateOnNotOperated !== 'undefined'
+            &&  self.suppressCartAttributesUpdateOnNotOperated == true
+            && !isCountryOperated(self.countryCode)) {
+            return;
+        }
+
+        if(typeof self.cartAttributesSkipPagesRegex !== 'undefined'
+            && self.cartAttributesSkipPagesRegex !== null
+            && self.cartAttributesSkipPagesRegex !== ""
+        )
+        {
+            var regex = RegExp(self.cartAttributesSkipPagesRegex, "i");
+            if(regex.test(location.href))
+                return;
+        }
+
+        function updateCartAttributes(attributes, forceGetCart = false){
+            return new Promise(function (resolve, reject) {
+                let cartToken = self.utils.getCookie("cart");
+
+                if (!("cartToken" in attributes)) {
+                    if (cartToken)
+                        attributes.cartToken = cartToken;
+                }
+
+                if (self.suppressCartAttributesUpdate && cartToken === null)
+                {
+                    resolve();
+                    return;
+                }
+
+                //cache mechanism to not call get cart several times on the same page     
+                if (!("geCartAttributes" in window))
+                    window.geCartAttributes = {};
+
+                let needUpdate = false;
+
+                for (const [key, value] of Object.entries(attributes)) {
+                    if (!(key in window.geCartAttributes) || JSON.stringify(window.geCartAttributes[key]) !== JSON.stringify(value)) {
+                        needUpdate = true;
+                        window.geCartAttributes[key] = value;
+                    }
+                }
+
+                if (!self.suppressCartAttributesUpdate && !needUpdate && !forceGetCart) {
+                    resolve();
+                    return;
+                }
+
+                self.utils.fetch('/cart.js')
+                    .then(response => response.json())
+                    .then(cartData => {
+                        if (cartData.token) {
+                            let attrsToUpdate = {};
+                            needUpdate = false;
+                            for (const [key, value] of Object.entries(window.geCartAttributes)) {
+                                if (!(key in cartData.attributes) || JSON.stringify(cartData.attributes[key]) !== JSON.stringify(value)) {
+                                    attrsToUpdate[key] = value;
+                                    needUpdate = true;
+                                }
+                            }
+
+                            if (needUpdate) {
+                                self.utils.fetch('/cart/update.js', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({attributes: attrsToUpdate})
+                                }).then(() => resolve());
+                            }else{
+                                resolve();
+                            }
+                        }else{
+                            resolve();
+                        }
+                    })
+                    .catch(function(error){
+                        //ignore. Endpoint might not exists on the headless merchant.
+                    });
+            });
+        }
+
+        self.utils.contentLoaded(window, function () {
+            document.addEventListener("cartAttributesReady", function (evt) {
+                let attributes = {};
+                evt.detail.forEach((el) => {
+                    let val = el.value;
+
+                    //boolean values cannot be saved correctly
+                    if (typeof val == "boolean")
+                        val = val.toString();
+
+                    attributes[el.key] = val;
+
+                });
+
+                //recheck cart via API to make sure latest update is not lost because of asynchronous update from other libs
+                let recheckTimeout1 = 500;//ms
+                let recheckTimeout2 = 1000;//ms
+
+                updateCartAttributes(attributes).then(() => {
+                    window.setTimeout(function() {
+                        updateCartAttributes({}, true).then(() => {
+                            window.setTimeout(function () {
+                                updateCartAttributes({}, true);
+                            }, recheckTimeout2);
+                        });
+                    }, recheckTimeout1);
+                });
+
+            });
+
+            // document.addEventListener("visitorConsentCollected", (event) => updateCartAttributes({}));
+
+            self.utils.addListener(events.onXHRRequest, function (e) {
+                var cartChangeUrls = ["/cart/add"]; //, "/cart/update", "/cart/change"
+                var changed = false;
+                for (var i = 0; i < cartChangeUrls.length; i++) {
+                    if (e.url.indexOf(cartChangeUrls[i]) > -1) {
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    glbeApp.getCartToken().then(function(cartToken){
+                        if(cartToken){
+                            if(!("geCartAttributes" in window) || window.geCartAttributes.cartToken != cartToken) {
+                                document.dispatchEvent(new Event("glbeParamsReady"));
+                            }
+                        }
+                    });
+                }
+            });
+
+            //wait for glbeApp  and FraudTokenManager wariables, wait for event subscription in FraudTokenManager
+            function whenAvailable(callback) {
+                var checkInterval = 10; // ms
+                var tokenManagerExecutionInterval = 10; // ms
+
+                if ("glbeApp" in window && "FraudTokenManager" in window){
+                    window.setTimeout(callback, tokenManagerExecutionInterval);
+                }else{
+                    window.setTimeout(function() {
+                        whenAvailable(callback);
+                    }, checkInterval);
+                }
+            }
+
+            whenAvailable(function(t) {
+                if (!self.suppressCartAttributesUpdate || self.utils.getCookie("cart") != null)
+                {
+                    document.dispatchEvent(new Event("glbeParamsReady"));
+                }
+            });
+
+        });
+    };
+
+    return {
+        constructor: GlobaleApp,
+        init: function () {
+            self = this;
+
+            let parms = {};
+            if(typeof GLBE_PARAMS_2 !== 'undefined'){
+                parms = GLBE_PARAMS_2; //new app.js endpoint
+            }else{
+                parms = GLBE_PARAMS; //to support old app.js endpoint. To remove later
+            }
+
+            if(typeof Shopify !== 'undefined'){
+                if(typeof Shopify.country !== 'undefined')
+                    parms.countryCode = Shopify.country;
+
+                if(typeof Shopify.currency !== 'undefined' && typeof Shopify.currency.active !== 'undefined')
+                    parms.currencyCode = Shopify.currency.active;
+
+                if(typeof Shopify.locale !== 'undefined')
+                    parms.locale = Shopify.locale;
+
+                if(typeof Shopify.shop !== 'undefined')
+                    parms.shop = Shopify.shop;
+            }
+
+            if(typeof GLBE_PARAMS !== 'undefined' && GLBE_PARAMS.isExternal === true){
+                parms = self.utils.extend(parms, GLBE_PARAMS);
+            }
+
+            GLBE_PARAMS = parms;
+            document.dispatchEvent(new Event("glbeParamsSet"));
+
+            this.shop = GLBE_PARAMS.shop;
+            this.merchantCode = GLBE_PARAMS.emi;
+            this.merchantId = GLBE_PARAMS.mid;
+            this.countryCode = GLBE_PARAMS.countryCode;
+            this.currencyCode = GLBE_PARAMS.currencyCode
+            this.locale = GLBE_PARAMS.locale;
+            this.operatedCountries = GLBE_PARAMS.operatedCountries;
+            this.appUrl = GLBE_PARAMS.appUrl;
+            this.apiUrl = GLBE_PARAMS.apiUrl;
+            this.geAppUrl = GLBE_PARAMS.geAppUrl;
+            this.geCDNUrl = GLBE_PARAMS.geCDNUrl;
+            this.hiddenElements = GLBE_PARAMS.hiddenElements;
+            this.listeners = {};
+            this.pixelUrl = GLBE_PARAMS.pixelUrl || 'https://utils.global-e.com';
+            this.pixelEnabled = GLBE_PARAMS.pixelEnabled;
+            this.environment = GLBE_PARAMS.env;
+            this.trackingCookieName = "GLBE_SESS_ID";
+            this.hitInfoKey = "GE_C_HCOUNT";
+            this.referreCookieName = "GlobalE_Ref";
+            this.c1Enabled = GLBE_PARAMS.c1Enabled;
+            this.isTokenEnabled = GLBE_PARAMS.isTokenEnabled;
+            this.siteId = GLBE_PARAMS.siteId;
+            this.cartAttributesSkipPagesRegex = GLBE_PARAMS.cartAttributesSkipPagesRegex;
+            this.suppressCartAttributesUpdate = GLBE_PARAMS.suppressCartAttributesUpdate;
+            this.suppressCartAttributesUpdateOnNotOperated = GLBE_PARAMS.suppressCartAttributesUpdateOnNotOperated;
+            this.useBrowsingStartEventInsteadOfPageViewed = GLBE_PARAMS.useBrowsingStartEventInsteadOfPageViewed;
+            this.isAnalyticsPageViewEventsDisabled = GLBE_PARAMS.isAnalyticsPageViewEventsDisabled;
+            this.ft3DayAttribution = GLBE_PARAMS.ft3DayAttribution;
+            this.masValidUtmSourceList = GLBE_PARAMS.masValidUtmSourceList;
+            this.masUtmStorageLifetime = GLBE_PARAMS.masUtmStorageLifetime;
+
+
+            addStyles();
+            setXHRListener();
+            initRestrictions();
+            initFreeShippingBanner();
+            createReplacementCookie();
+            initGEActive();
+            setCartAttributes();
+            initGlobale();
+
+        },
+        utils: {
+            getQueryParam: function (name, optUrl) {
+                var url = !optUrl ? window.location.search : optUrl;
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(url);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            },
+            addParameter: function (url, parameterName, parameterValue, atStart) {
+                if (url.indexOf('#') > 0) {
+                    var cl = url.indexOf('#');
+                    urlhash = url.substring(url.indexOf('#'), url.length);
+                } else {
+                    urlhash = '';
+                    cl = url.length;
+                }
+                sourceUrl = url.substring(0, cl);
+
+                var urlParts = sourceUrl.split("?");
+                var newQueryString = "";
+
+                if (urlParts.length > 1) {
+                    var parameters = urlParts[1].split("&");
+                    for (var i = 0; (i < parameters.length); i++) {
+                        var parameterParts = parameters[i].split("=");
+                        if (!(parameterParts[0] == parameterName)) {
+                            if (newQueryString == "")
+                                newQueryString = "?";
+                            else
+                                newQueryString += "&";
+                            newQueryString += parameterParts[0] + "=" + (parameterParts[1] ? parameterParts[1] : '');
+                        }
+                    }
+                }
+                if (newQueryString == "")
+                    newQueryString = "?";
+
+                if (atStart) {
+                    newQueryString = '?' + parameterName + "=" + parameterValue + (newQueryString.length > 1 ? '&' + newQueryString.substring(1) : '');
+                } else {
+                    if (newQueryString !== "" && newQueryString != '?')
+                        newQueryString += "&";
+                    newQueryString += parameterName + "=" + (parameterValue ? parameterValue : '');
+                }
+                return urlParts[0] + newQueryString + urlhash;
+            },
+            getCookie: function (c_name, isJson) {
+                try {
+                    var c_value = document.cookie;
+                    var c_start = c_value.indexOf(" " + c_name + "=");
+                    if (c_start == -1) {
+                        c_start = c_value.indexOf(c_name + "=");
+                    }
+                    if (c_start == -1) {
+                        c_value = null;
+                    }
+                    else {
+                        c_start = c_value.indexOf("=", c_start) + 1;
+                        var c_end = c_value.indexOf(";", c_start);
+                        if (c_end == -1) {
+                            c_end = c_value.length;
+                        }
+                        c_value = unescape(c_value.substring(c_start, c_end));
+                    }
+
+                    if (isJson) {
+                        return JSON.parse(c_value);
+                    }
+
+                    return c_value;
+                }
+                catch (ex) {
+                    console.log('glbe error', ex);
+                }
+            },
+            setCookie: function (c_name, value, expire, isJson, isMinutes, setExpireAsSession) {
+                try {
+                    if (isJson) {
+                        value = JSON.stringify(value);
+                    }
+                    var c_value = "";
+                    if (!setExpireAsSession) {
+                        var exdate = new Date();
+                        if (!isMinutes)
+                            exdate.setDate(exdate.getDate() + expire);
+                        else
+                            exdate.setTime(exdate.getTime() + expire * 60 * 1000);
+
+                        c_value = escape(value) + ((expire == null) ? "" : "; expires=" + exdate.toUTCString()) + ";domain=" + document.domain + ";path=/";
+                    } else {
+                        c_value = escape(value) + ";domain=" + document.domain + ";path=/";
+                    }
+                    c_value += ";SameSite=Lax";
+                    document.cookie = c_name + "=" + c_value;
+                }
+                catch (ex) {
+                    console.log('glbe error', ex);
+                    console.log('glbe error', ex);
+                }
+            },
+            parseUrl: function (href) {
+                var parser = document.createElement("a");
+                parser.href = href;
+                return {
+                    protocol: parser.protocol, // => "http:"
+                    host: parser.host,         // => "example.com:3000"
+                    hostname: parser.hostname, // => "example.com"
+                    port: parser.port,         // => "3000"
+                    pathname: parser.pathname, // => "/pathname/"
+                    hash: parser.hash,         // => "#hash"
+                    search: parser.search,     // => "?search=test"
+                    origin: parser.origin      // => "http://example.com:3000"
+                }
+            },
+            addListener: function (type, listener) {
+                if (typeof self.listeners[type] == "undefined") {
+                    self.listeners[type] = [];
+                }
+
+                self.listeners[type].push(listener);
+            },
+            emitEvent: function (event, data) {
+                if (!event) {
+                    throw new Error("Event object missing 'type' property.");
+                }
+
+                if (self.listeners[event] instanceof Array) {
+                    var listeners = self.listeners[event];
+                    for (var i = 0, len = listeners.length; i < len; i++) {
+                        listeners[i].call(self, data);
+                    }
+                }
+            },
+            notification: function (message, style) {
+                var styles = {
+                    close: {
+                        position: 'absolute',
+                        top: '3px',
+                        right: '11px',
+                        fontSize: '22px',
+                        cursor: 'pointer',
+                        lineHeight: '22px',
+                        fontFamily: 'Helvetica, "Helvetica Neue", Arial, "Lucida Grande", sans-serif',
+                    },
+                    base: {
+                        position: 'absolute',
+                        top: '90px',
+                        backgroundColor: 'rgb(44 174 230)',
+                        color: '#fff',
+                        left: '50%',
+                        zIndex: '99999999',
+                        padding: '16px',
+                        fontSize: '15px',
+                        fontFamily: 'Helvetica, "Helvetica Neue", Arial, "Lucida Grande", sans-serif',
+                        borderRadius: '3px',
+                        boxShadow: '0px 0px 5px #999',
+                        transform: 'translateX(-50%)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: '15px center'
+                    },
+                    warning: {
+                        backgroundColor: '#F89405',
+                        padding: '16px 50px',
+                        backgroundImage: 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGYSURBVEhL5ZSvTsNQFMbXZGICMYGYmJhAQIJAICYQPAACiSDB8AiICQQJT4CqQEwgJvYASAQCiZiYmJhAIBATCARJy+9rTsldd8sKu1M0+dLb057v6/lbq/2rK0mS/TRNj9cWNAKPYIJII7gIxCcQ51cvqID+GIEX8ASG4B1bK5gIZFeQfoJdEXOfgX4QAQg7kH2A65yQ87lyxb27sggkAzAuFhbbg1K2kgCkB1bVwyIR9m2L7PRPIhDUIXgGtyKw575yz3lTNs6X4JXnjV+LKM/m3MydnTbtOKIjtz6VhCBq4vSm3ncdrD2lk0VgUXSVKjVDJXJzijW1RQdsU7F77He8u68koNZTz8Oz5yGa6J3H3lZ0xYgXBK2QymlWWA+RWnYhskLBv2vmE+hBMCtbA7KX5drWyRT/2JsqZ2IvfB9Y4bWDNMFbJRFmC9E74SoS0CqulwjkC0+5bpcV1CZ8NMej4pjy0U+doDQsGyo1hzVJttIjhQ7GnBtRFN1UarUlH8F3xict+HY07rEzoUGPlWcjRFRr4/gChZgc3ZL2d8oAAAAASUVORK5CYII=)',
+                    }
+                };
+
+                var el = document.createElement('div');
+                self.utils.extend(el.style, styles.base, styles[style]);
+                el.innerText = message;
+                var closeBtn = document.createElement('div');
+                closeBtn.innerText = '×';
+                self.utils.extend(closeBtn.style, styles.close);
+                //el.appendChild(closeBtn);
+                closeBtn.addEventListener('click', function () {
+                    el.parentElement.removeChild(el);
+                });
+                document.body.appendChild(el);
+                return el;
+            },
+            contentLoaded: function (win, fn) {
+                var done = false, top = true,
+
+                    doc = win.document,
+                    root = doc.documentElement,
+                    modern = doc.addEventListener,
+
+                    add = modern ? 'addEventListener' : 'attachEvent',
+                    rem = modern ? 'removeEventListener' : 'detachEvent',
+                    pre = modern ? '' : 'on',
+
+                    init = function (e) {
+                        if (e.type == 'readystatechange' && doc.readyState != 'complete') return;
+                        (e.type == 'load' ? win : doc)[rem](pre + e.type, init, false);
+                        if (!done && (done = true)) fn.call(win, e.type || e);
+                    },
+
+                    poll = function () {
+                        try { root.doScroll('left'); } catch (e) { setTimeout(poll, 50); return; }
+                        init('poll');
+                    };
+
+                if (doc.readyState == 'complete') fn.call(win, 'lazy');
+                else {
+                    if (!modern && root.doScroll) {
+                        try { top = !win.frameElement; } catch (e) { }
+                        if (top) poll();
+                    }
+                    doc[add](pre + 'DOMContentLoaded', init, false);
+                    doc[add](pre + 'readystatechange', init, false);
+                    win[add](pre + 'load', init, false);
+                }
+
+            },
+            extend: function (out) {
+                out = out || {};
+                for (var i = 1; i < arguments.length; i++) {
+                    if (!arguments[i])
+                        continue;
+
+                    for (var key in arguments[i]) {
+                        if (arguments[i].hasOwnProperty(key) &&
+                            arguments[i][key] !== null &&
+                            typeof arguments[i][key] != 'undefined')
+
+                            out[key] = arguments[i][key];
+                    }
+                }
+                return out;
+            },
+            fetch: function () {
+                this.isGlobalE = true;
+                return window.fetch.apply(this, arguments);
+            },
+            httpRequest: function (url, opts) {
+                var self = this;
+                return new Promise(function (resolve, reject) {
+                    var req = new XMLHttpRequest();
+                    req.isGlobalE = true;
+                    opts = self.extend({
+                        method: 'GET',
+                        contentType: 'application/x-www-form-urlencoded',
+                        cache: false
+                    }, opts);
+
+                    req.open(opts.method, url, true);
+
+                    req.setRequestHeader('Content-Type', opts.contentType);
+                    if (opts.cache === false) {
+                        url += (url.indexOf('?') > -1 ? '&_=' : '?_=') + (new Date()).getTime();
+                    }
+
+                    var data = opts.data ? JSON.stringify(opts.data) : null;
+
+                    req.onload = function () {
+                        if (req.status == 200) {
+                            var res = req.response;
+                            if (opts.contentType == "application/json") {
+                                try {
+                                    res = JSON.parse(res);
+                                } catch (e) {
+                                    //response is not JSON
+                                }
+                            }
+                            resolve(res);
+                        }
+                        else {
+                            reject(new Error(req.statusText == null || req.statusText == "" ? req.status : req.statusText));
+                        }
+                    };
+
+                    req.onerror = function () {
+                        reject(Error("Network Error"));
+                    };
+                    req.send(data);
+                });
+            },
+            deferred: function () {
+                var dfd = {};
+                dfd.promise = new Promise(function (resolve, reject) {
+                    dfd.resolve = resolve;
+                    dfd.reject = reject;
+                });
+                return dfd;
+            },
+            getScript: function (url, opts) {
+                return new Promise(function (res, rej) {
+                    if (opts) {
+                        if (opts.uriParams) {
+                            for (var p in opts.uriParams) {
+                                if (opts.uriParams.hasOwnProperty(p)) {
+                                    url += (url.indexOf('?') > -1 ? '&' : '?') + p + '=' + encodeURIComponent(opts.uriParams[p]);
+                                }
+                            }
+                        }
+
+                        if (opts.cache === false) {
+                            url += (url.indexOf('?') > -1 ? '&_=' : '?_=') + (new Date()).getTime();
+                        }
+                    }
+
+                    var s = document.createElement('script');
+                    s.type = 'text/javascript';
+                    s.async = true;
+
+                    if (opts && opts.jsonp) {
+                        var jsonp = 'jsonp_' + (new Date()).getTime();
+                        if (opts.jsonpFunction)
+                            jsonp = opts.jsonpFunction;
+
+                        url += (url.indexOf('?') > -1 ? '&' : '?') + opts.jsonp + '=' + jsonp;
+                        window[jsonp] = function (data) {
+                            res(data);
+                        }
+                    }
+                    else {
+                        s.onload = function () {
+                            res();
+                        }
+                    }
+
+                    s.src = url;
+                    document.getElementsByTagName('head')[0].appendChild(s);
+                });
+            },
+            formPost: function (path, params, method = 'post') {
+                var form = document.createElement('form');
+                form.method = method;
+                form.action = path;
+
+                for (var key in params) {
+                    if (params.hasOwnProperty(key)) {
+                        var hiddenField = document.createElement('input');
+                        hiddenField.type = 'hidden';
+                        hiddenField.name = key;
+                        hiddenField.value = params[key];
+
+                        form.appendChild(hiddenField);
+                    }
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            },
+            isLinkAdded: function (search) {
+                var items = document.getElementsByTagName('link');
+                for (var i = items.length; i--;) {
+                    if (items[i].href.indexOf(search) > -1) return true;
+                }
+                return false;
+            }
+        },
+        modules: {
+            priceInfo: {
+                load: function () {
+                    if (isCountryOperated(GLBE_PARAMS.countryCode)) {
+                        return self.utils.getScript(self.appUrl + "resources/PriceInfo?shop=" + self.shop + "&countryCode=" + GLBE_PARAMS.countryCode + "&currencyCode=" + GLBE_PARAMS.currencyCode, {
+                            jsonp: "jsoncallback",
+                            jsonpFunction: "priceInfoCallback",
+                            contentType: "application/json"
+                        }).then(function (data) {
+                            if (!data.success)
+                                return;
+
+                            GLBE_PARAMS.PriceInfo = data;
+                            return;
+                        })
+                    } else
+                        return Promise.resolve();
+                },
+                convertPrice: function (basePrice) {
+                    if (!isCountryOperated(GLBE_PARAMS.countryCode))
+                        return basePrice;
+
+                    if (!GLBE_PARAMS.PriceInfo)
+                        throw "Module is not loaded";
+
+                    //if (!GLBE_PARAMS.PriceInfo.isOperatedByGlobale)
+                    //    return basePrice;
+
+                    var productLocalVatRate = GLBE_PARAMS.PriceInfo.vatSettings.localVATRate;
+                    var productCountryVatRate = GLBE_PARAMS.PriceInfo.vatSettings.distanceSellingVATRate;
+                    var priceCoefficient = GLBE_PARAMS.PriceInfo.countryCoefficientRate;
+                    var productClassCoefficient = 0;
+                    var fxRate = GLBE_PARAMS.PriceInfo.currencyConversionRate * priceCoefficient;
+
+                    var vatRateTypes = {
+                        localVATRateType: { rate: GLBE_PARAMS.PriceInfo.vatSettings.localVATRate },
+                        vatRateType: { rate: GLBE_PARAMS.PriceInfo.vatSettings.distanceSellingVATRate },
+                        includeVATTypeId: GLBE_PARAMS.PriceInfo.vatSettings.vatTypeId,
+                        useCountryVAT: GLBE_PARAMS.PriceInfo.vatSettings.useDistanceSellingVAT
+                    };
+                    var skipRounding = false;
+
+                    return calculatePrice(basePrice, fxRate, vatRateTypes, productLocalVatRate, GLBE_PARAMS.PriceInfo.isGrossPrices, GLBE_PARAMS.PriceInfo.currencyDecimalPlaces, 1,
+                        productClassCoefficient, priceCoefficient, productCountryVatRate, GLBE_PARAMS.PriceInfo.roundingRules, skipRounding);
+                }
+            }
+        },
+
+        getCartToken: function(){
+            return new Promise(function (resolve, reject) {
+                let cartToken = self.utils.getCookie("cart");
+                if (!cartToken){
+                    self.utils.fetch('/cart.js')
+                        .then(response => response.json())
+                        .then(cartData => {
+                            if (cartData.token) {
+                                resolve(cartData.token);
+                            } else
+                                reject();
+                        })
+                        .catch(function(error){
+                            //ignore. Endpoint might not exists on the headless merchant.
+                        });
+                }else{
+                    resolve(cartToken);
+                }
+            });
+        },
+
+    };
+})();
+
+let paramsIsFromCheckoutLiquid = typeof GLBE_PARAMS !== 'undefined' && GLBE_PARAMS.checkoutId;
+if (!paramsIsFromCheckoutLiquid) { //make sure GLBE_PARAMS is not from checkout.liquid
+    var glbeApp = new GlobaleApp();
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { GlobaleApp };
+} 
