@@ -1,0 +1,11 @@
+<h2 style="text-align: center;">Featured Products</h2>
+<div class="fashion-section">
+  <% products.forEach(product => { %>
+    <div class="fashion-item">
+      <img src="/assets/<%= product.image %>" alt="<%= product.name %>">
+      <h2><%= product.name %></h2>
+      <p><%= product.description %></p>
+      <p><strong><%= product.price %></strong></p>
+    </div>
+  <% }) %>
+</div>
