@@ -1,0 +1,20 @@
+<h2 class="form-title">Add New Vehicle</h2>
+
+<form action="/admin/add-vehicle" method="POST" enctype="multipart/form-data" class="vehicle-form">
+  <input type="text" name="name" placeholder="Vehicle Name" required class="vehicle-input">
+
+  <input type="text" name="brand" placeholder="Brand" required class="vehicle-input">
+
+  <input type="number" name="price" placeholder="Price" required class="vehicle-input">
+
+  <select name="type" required class="vehicle-input">
+    <option value="">Select Type</option>
+    <option value="sedan">Sedan</option>
+    <option value="SUV">SUV</option>
+    <option value="truck">Truck</option>
+  </select>
+
+  <input type="file" name="image" accept="image/*" required class="vehicle-input">
+
+  <button type="submit" class="vehicle-button">Add Vehicle</button>
+</form>

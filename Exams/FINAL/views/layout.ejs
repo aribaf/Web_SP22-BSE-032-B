@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jigsaw</title>
+  <link rel="stylesheet" href="/jigsaw.css" />
+ 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="top-bar">Up to 50% Off | Shop Now</div>
+
+    <nav class="navbar" style="display: flex; justify-content: space-between; align-items: center; padding: 0 20px;">
+      <!-- Logo -->
+      <div class="logo">
+        <a href="/">
+          <svg class="site-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566 90" fill-rule="nonzero" stroke-linejoin="round" stroke-miterlimit="2">
+            <title>Jigsaw</title>
+            <!-- Truncated SVG path to save space -->
+            <path d="..."></path>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Navigation Links -->
+ <ul class="nav-links" style="display: flex; gap: 20px; list-style: none; margin: 0; padding: 0;">
+  <li><a href="/">Home</a></li>
+  <li><a href="/products">Products</a></li>
+  <li><a href="/vehicles">Vehicles</a></li> <!-- ✅ New Link -->
+  <li><a href="/about">About</a></li>
+
+  <% if (user && user.isAdmin) { %>
+    <li><a href="/admin/products">Admin Dashboard</a></li>
+    <li><a href="/admin/vehicles">Manage Vehicles</a></li>
+  <% } %>
+</ul>
+
+
+      <!-- Auth & Icons -->
+      <div class="auth-icons" style="display: flex; align-items: center; gap: 15px;">
+        <% if (user) { %>
+          <span style="font-weight: bold;">Welcome, <%= user.username %></span>
+          <a href="/my-orders">My Orders</a>
+          <a href="/logout">Logout</a>
+        <% } else { %>
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        <% } %>
+
+        <!-- Icons -->
+        <div class="icons" style="display: flex; gap: 10px; margin-left: 15px;">
+          <div class="search-container" style="display: flex; align-items: center; gap: 5px;">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search" style="padding: 5px;" />
+          </div>
+          <i class="far fa-user"></i>
+          <i class="fas fa-shopping-bag"></i>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <%- body %>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-container">
+      <div class="newsletter">
+        <p>Sign up to our newsletter to hear about new releases and be the first in line for exclusive events and promotions.</p>
+        <input type="email" placeholder="Email" />
+        <div class="social-icons">
+          <i class="fa-brands fa-facebook"></i>
+          <i class="fa-brands fa-instagram"></i>
+          <i class="fa-brands fa-youtube"></i>
+          <i class="fa-brands fa-pinterest"></i>
+        </div>
+      </div>
+
+      <div class="footer-links">
+        <div class="column">
+          <h4>Customer Experience</h4>
+          <a href="#">Delivery & Returns</a>
+          <a href="#">The Collector</a>
+          <a href="#">Personal Stylist</a>
+          <a href="#">Harper Try At Home</a>
+          <a href="#">Size Guide</a>
+        </div>
+        <div class="column">
+          <h4>Our Company</h4>
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Cookie Policy</a>
+          <a href="#">Careers</a>
+          <a href="#">Press & Media</a>
+          <a href="#">Sourcing Principles</a>
+          <a href="#">Modern Slavery Statement</a>
+        </div>
+        <div class="column">
+          <h4>Support</h4>
+          <a href="#">Live Chat</a>
+          <a href="#">WhatsApp</a>
+          <a href="#">Visit our support centre</a>
+          <h5>Live Chat Opening Hours</h5>
+          <p>Monday - Saturday: 10AM - 4PM</p>
+          <p>Sunday: CLOSED</p>
+          <p>Bank Holidays: 10AM - 4PM</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+      <div class="country-selector">
+        <i class="fa-solid fa-globe"></i>
+        <select>
+          <option>Pakistan</option>
+          <option>United States</option>
+          <option>United Kingdom</option>
+          <option>Canada</option>
+          <option>Australia</option>
+          <option>Germany</option>
+          <option>France</option>
+          <option>Italy</option>
+          <option>Spain</option>
+          <option>Netherlands</option>
+          <option>India</option>
+          <option>China</option>
+        </select>
+      </div>
+      <div class="footer-logo">
+        <svg class="site-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 566 90" fill-rule="nonzero" stroke-linejoin="round" stroke-miterlimit="2">
+          <title>Jigsaw</title>
+          <path d="..."></path> <!-- Truncated for readability -->
+        </svg>
+        <p>© Jigsaw 2024</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

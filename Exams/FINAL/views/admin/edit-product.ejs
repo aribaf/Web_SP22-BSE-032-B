@@ -1,0 +1,12 @@
+<div class="edit-product-wrapper" style="display: flex; justify-content: center; padding: 40px 20px;">
+  <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px;">
+    <h2 style="text-align: center; margin-bottom: 20px;">Edit Product</h2>
+    <form method="POST" action="/admin/products/edit/<%= product._id %>">
+      <input name="title" value="<%= product.title %>" placeholder="Title" required style="width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #ccc;">
+      <input name="price" type="number" value="<%= product.price %>" placeholder="Price" required style="width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #ccc;">
+      <textarea name="description" placeholder="Description" style="width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 6px; border: 1px solid #ccc;"><%= product.description %></textarea>
+      <input name="imageUrl" value="<%= product.imageUrl %>" placeholder="Image URL" style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc;">
+      <button type="submit" style="width: 100%; background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 6px; font-size: 16px;">Update Product</button>
+    </form>
+  </div>
+</div>

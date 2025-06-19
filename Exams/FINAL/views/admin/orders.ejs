@@ -1,0 +1,31 @@
+<div style="padding: 40px 20px;">
+  <h2 style="text-align: center; margin-bottom: 30px;">All Orders</h2>
+  <table style="width: 100%; border-collapse: collapse; background-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background-color: #f0f0f0; text-align: left;">
+        <th style="padding: 12px 16px; border-bottom: 1px solid #ddd;">Customer</th>
+        <th style="padding: 12px 16px; border-bottom: 1px solid #ddd;">Items</th>
+        <th style="padding: 12px 16px; border-bottom: 1px solid #ddd;">Total</th>
+        <th style="padding: 12px 16px; border-bottom: 1px solid #ddd;">Status</th>
+        <th style="padding: 12px 16px; border-bottom: 1px solid #ddd;">Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(order => { %>
+        <tr style="border-top: 1px solid #eee;">
+          <td style="padding: 12px 16px;"><%= order.user.name %></td>
+          <td style="padding: 12px 16px;">
+            <ul style="margin: 0; padding-left: 16px;">
+              <% order.items.forEach(item => { %>
+                <li><%= item.title %> × <%= item.quantity %></li>
+              <% }) %>
+            </ul>
+          </td>
+          <td style="padding: 12px 16px;">$<%= order.totalPrice %></td>
+          <td style="padding: 12px 16px;"><%= order.status %></td>
+          <td style="padding: 12px 16px;"><%= order.createdAt.toLocaleDateString() %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

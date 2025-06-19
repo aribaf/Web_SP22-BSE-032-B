@@ -1,0 +1,15 @@
+const express = require('express');
+const router = express.Router();
+const Vehicle = require('../models/Vehicle');
+
+router.get('/vehicles', async (req, res) => {
+  try {
+    const vehicles = await Vehicle.find();
+    res.render('vehicles', { vehicles });
+  } catch (err) {
+    console.error(err);
+    res.send('Error loading vehicles');
+  }
+});
+
+module.exports = router;

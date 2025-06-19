@@ -1,0 +1,25 @@
+<h2 style="text-align: center; margin-top: 30px;"> My Orders</h2>
+
+<% if (orders.length === 0) { %>
+  <p style="text-align: center;">You have not placed any orders yet.</p>
+<% } else { %>
+  <div style="width: 80%; margin: 30px auto;">
+    <% orders.forEach(order => { %>
+      <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px;">
+        <h3>Order ID: <%= order._id %></h3>
+        <p><strong>Name:</strong> <%= order.name %></p>
+        <p><strong>Phone:</strong> <%= order.phone %></p>
+        <p><strong>Address:</strong> <%= order.address %></p>
+        <p><strong>Status:</strong> <%= order.status %></p>
+        <p><strong>Total:</strong> $<%= order.total.toFixed(2) %></p>
+
+        <h4>Items:</h4>
+        <ul>
+          <% order.items.forEach(item => { %>
+            <li><%= item.quantity %> x <%= item.name %> - $<%= item.price.toFixed(2) %></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% }) %>
+  </div>
+<% } %>

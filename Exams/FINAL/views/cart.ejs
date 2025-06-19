@@ -1,0 +1,74 @@
+<h2 style="text-align: center; margin-top: 40px; font-size: 2rem;">Your Shopping Cart</h2>
+
+<% if (cart.length === 0) { %>
+  <p style="text-align: center; font-size: 1.1rem; margin-top: 20px; color: #777;">Your cart is empty.</p>
+<% } else { %>
+  <form method="POST" action="/update-cart" style="margin-top: 30px;">
+    <div style="overflow-x: auto; padding: 0 20px;">
+      <table style="width: 100%; max-width: 1000px; margin: auto; border-collapse: collapse; font-size: 1rem; background: #fff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+        <thead>
+          <tr style="background-color: #f0f0f0;">
+            <th style="text-align: left; padding: 14px 16px;">Product</th>
+            <th style="text-align: center; padding: 14px 16px;">Price</th>
+            <th style="text-align: center; padding: 14px 16px;">Quantity</th>
+            <th style="text-align: center; padding: 14px 16px;">Subtotal</th>
+            <th style="text-align: center; padding: 14px 16px;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cart.forEach((item, index) => { %>
+            <tr style="border-top: 1px solid #eee;">
+              <td style="padding: 14px 16px;"><%= item.name %></td>
+              <td style="text-align: center;">$<%= item.price.toFixed(2) %></td>
+              <td style="text-align: center;">
+                <input 
+                  type="number" 
+                  name="quantities[]" 
+                  value="<%= item.quantity %>" 
+                  min="1" 
+                  style="width: 60px; padding: 6px; text-align: center; border-radius: 4px; border: 1px solid #ccc;">
+                <input type="hidden" name="names[]" value="<%= item.name %>">
+              </td>
+              <td style="text-align: center;">$<%= (item.price * item.quantity).toFixed(2) %></td>
+              <td style="text-align: center;">
+                <form id="remove-<%= index %>" method="POST" action="/remove-from-cart">
+                  <input type="hidden" name="name" value="<%= item.name %>">
+                </form>
+                <button 
+                  form="remove-<%= index %>" 
+                  type="submit" 
+                  onclick="return confirm('Are you sure you want to remove this item?')" 
+                  style="background-color: #dc3545; color: white; padding: 6px 14px; border: none; cursor: pointer; border-radius: 4px;">
+                  Remove
+                </button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Update Button -->
+    <div style="text-align: center; margin-top: 30px;">
+      <button 
+        type="submit" 
+        style="background-color: #fd7e14; color: white; padding: 10px 25px; border: none; font-weight: bold; cursor: pointer; border-radius: 5px;">
+         Update Cart
+      </button>
+    </div>
+  </form>
+
+  <!-- Total Price -->
+  <p style="text-align: center; font-size: 1.4rem; margin-top: 30px;">
+    <strong>Total: $<%= total.toFixed(2) %></strong>
+  </p>
+
+  <!-- Checkout Button -->
+  <div style="text-align: center; margin: 20px 0 50px;">
+    <a 
+      href="/checkout" 
+      style="background-color: #343a40; color: white; padding: 12px 30px; text-decoration: none; font-weight: bold; border-radius: 5px;">
+       Proceed to Checkout
+    </a>
+  </div>
+<% } %>

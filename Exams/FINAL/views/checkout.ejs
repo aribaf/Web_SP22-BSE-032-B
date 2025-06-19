@@ -1,0 +1,22 @@
+<h2 style="text-align: center; margin-top: 40px; font-size: 2rem;"> Checkout</h2>
+
+<form method="POST" action="/place-order" style="max-width: 500px; margin: 30px auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-family: sans-serif;">
+  
+  <label style="display: block; margin-bottom: 8px; font-weight: bold;">Name</label>
+  <input type="text" name="name" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 20px;">
+
+  <label style="display: block; margin-bottom: 8px; font-weight: bold;">Phone</label>
+  <input type="text" name="phone" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 20px;">
+
+  <label style="display: block; margin-bottom: 8px; font-weight: bold;">Address</label>
+  <textarea name="address" required rows="4" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 25px;"></textarea>
+
+  <p style="font-size: 1.2rem; text-align: center; margin-bottom: 30px;">
+    <strong>Total: $<%= total.toFixed(2) %></strong>
+  </p>
+
+  <button type="submit"
+          style="width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer;">
+    Pay Later with Cash
+  </button>
+</form>

@@ -1,0 +1,22 @@
+<h2 class="vehicle-admin-heading">All Vehicles</h2>
+
+<a href="/admin/add-vehicle" class="add-vehicle-link">+ Add New Vehicle</a>
+
+<ul class="vehicle-list">
+  <% vehicles.forEach(vehicle => { %>
+    <li class="vehicle-item">
+      <div class="vehicle-info">
+        <img src="/assets/<%= vehicle.image %>" class="vehicle-thumb" alt="<%= vehicle.name %>">
+        <div class="vehicle-details">
+          <strong><%= vehicle.name %></strong> - <%= vehicle.brand %> - <%= vehicle.type %> - $<%= vehicle.price %>
+        </div>
+      </div>
+      <div class="vehicle-actions">
+        <a href="/admin/edit-vehicle/<%= vehicle._id %>" class="edit-btn">Edit</a>
+        <form action="/admin/delete-vehicle/<%= vehicle._id %>" method="POST" class="delete-form">
+          <button type="submit" class="delete-btn">Delete</button>
+        </form>
+      </div>
+    </li>
+  <% }) %>
+</ul>

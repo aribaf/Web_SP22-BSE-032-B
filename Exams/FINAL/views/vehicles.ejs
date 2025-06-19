@@ -1,0 +1,17 @@
+<div class="vehicle-container">
+  <h2 class="vehicle-heading">Available Vehicles</h2>
+
+  <div class="vehicle-grid">
+    <% vehicles.forEach(v => { %>
+      <div class="vehicle-card">
+        <img src="/assets/<%= v.image %>" alt="<%= v.name %>" class="vehicle-image">
+        <div class="vehicle-details">
+          <h3 class="vehicle-name"><%= v.name %></h3>
+          <p><strong>Brand:</strong> <%= v.brand %></p>
+          <p><strong>Type:</strong> <%= v.type %></p>
+          <p><strong>Price:</strong> $<%= v.price %></p>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>
